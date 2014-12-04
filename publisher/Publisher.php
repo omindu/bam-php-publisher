@@ -1,12 +1,13 @@
 <?php
-include 'PublisherConstants.php';
-include 'PublisherConnector.php';
-include '../logger/php/Logger.php';
+include_once 'PublisherConstants.php';
+include_once 'PublisherConnector.php';
+include_once  '../logger/php/Logger.php';
 
 Logger::configure('../logger/config.xml');
 
 use org\wso2\carbon\databridge\commons\thrift\exception\ThriftNoStreamDefinitionExistException;
 use org\wso2\carbon\databridge\commons\thrift\service\secure\ThriftSecureEventTransmissionServiceClient;
+use org\wso2\carbon\databridge\commons\thrift\exception\ThriftSessionExpiredException;
 class Publisher {
 	
 	/**
@@ -75,6 +76,7 @@ class Publisher {
 	}
 	
 	/**
+	 * Processes the publish URL
 	 *
 	 * @param array $receiverURL        	
 	 * @throws Exception
@@ -84,6 +86,7 @@ class Publisher {
 			str_replace ( 'localhost', '127.0.0.1', $receiverURL );
 			$this->log->info('Changing receiver url from \'localhost\' to 127.0.0.1');
 		}
+		
 		$url = parse_url ( $receiverURL );
 		
 		if (array_key_exists ( 'host', $url ) && array_key_exists ( 'port', $url )) {
@@ -101,6 +104,7 @@ class Publisher {
 	}
 	
 	/**
+	 * Processes the authentication URL
 	 *
 	 * @param array $authenticationURL        	
 	 * @throws Exception
@@ -141,6 +145,7 @@ class Publisher {
 	}
 	
 	/**
+	 * Search a stream definition, given the stream name and the version
 	 *
 	 * @param string $streamName        	
 	 * @param string $streaVersion        	
@@ -156,10 +161,32 @@ class Publisher {
 			$this->log->error('Stream definition expired.');
 		}
 	}
-	public function addStreamDefinition($streamDefinision, $streamName, $streamVersion) {
+	
+
+	/**
+	 * Adds a stream definition to BAM
+	 * 
+	 * @param string $streamDefinision
+	 * @return string stream ID upon successfull insertion
+	 */
+	public function addStreamDefinition($streamDefinision) {
 		return $this->connector->getPublisherClient ()->defineStream ( $this->connector->getSessionId (), $streamDefinition );
 		
-		// $connector = new ThriftSecureEventTransmissionServiceClient($input);
+		// $connector = new ThriftSecureEventTransmissionServiceClient($input); //<-remove!!
 		// $connector->defineStream($sessionId, $streamDefinition);
 	}
+	
+	
+	//Untested!!! 
+	/**
+	 * 
+	 * @param Event $event
+	 */
+	public function publish($event){
+		//$connector = new ThriftSecureEventTransmissionServiceClient($input); //<-remove!!
+		
+		$eventBundle = ThriftEventConverter::covertToThriftBundle($event, $this->connector->getSessionId ());
+		$this->connector->publish($eventBundle);
+	}
+	
 }

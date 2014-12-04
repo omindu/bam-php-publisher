@@ -1,5 +1,5 @@
 <?php
-include __DIR__ . '/../lib/Thrift/ClassLoader/ThriftClassLoader.php';
+include_once __DIR__ . '/../lib/Thrift/ClassLoader/ThriftClassLoader.php';
 
 use Thrift\ClassLoader\ThriftClassLoader;
 
@@ -10,15 +10,16 @@ $loader->register ();
 include __DIR__ . '/../gen-php/org/wso2/carbon/databridge/commons/thrift/exception/Types.php';
 include __DIR__ . '/../gen-php/org/wso2/carbon/databridge/commons/thrift/service/general/ThriftEventTransmissionService.php';
 include __DIR__ . '/../gen-php/org/wso2/carbon/databridge/commons/thrift/service/secure/ThriftSecureEventTransmissionService.php';
-include '../logger/php/Logger.php';
+//include '../logger/php/Logger.php';
 
-Logger::configure('../logger/config.xml');
+//Logger::configure('../logger/config.xml');
 
 use Thrift\Transport\TSocket;
 use Thrift\Transport\TBufferedTransport;
 use Thrift\Protocol\TBinaryProtocolAccelerated;
 use org\wso2\carbon\databridge\commons\thrift\service\secure\ThriftSecureEventTransmissionServiceClient;
 use Thrift\Exception\TTransportException;
+use Thrift\Exception\TException;
 class PubllisherConnector {
 	private $receiverURL;
 	private $authenticationURL;
@@ -65,7 +66,8 @@ class PubllisherConnector {
 			$this->sessionId = $this->secureClient->connect ( $this->username, $this->password );
 		}catch(Exception $e){
 			$this->log->error('Error connecting the secure client - '.$e);
-			$this->sessionId = 'd50c08c4-ecf2-42db-abba-519c1f20f026';
+			//$this->sessionId = 'd50c08c4-ecf2-42db-abba-519c1f20f026';
+			throw $e;
 		}
 		
 	}
@@ -89,6 +91,9 @@ class PubllisherConnector {
 				$this->log->error('Error creating the secure protocol - '.$e);
 				throw $e;
 			}
+		}catch ( TException $e ){
+			$this->log->error('Error creating the secure protocol - '.$e);
+			throw $e;
 		}
 		
 		if ($this->isSinglePublishURL) {
