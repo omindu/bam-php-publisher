@@ -14,6 +14,7 @@ class ThriftEventConverter
      * @param string $sessionId            
      * @param \org\wso2\carbon\databridge\commons\thrift\data\ThriftEventBundle $eventBundle            
      * @return \org\wso2\carbon\databridge\commons\thrift\data\ThriftEventBundle
+     * @throws UnknownAttributeException
      */
     public static function covertToThriftBundle($event, $sessionId, $thiftEventBundle = NULL)
     {
@@ -43,6 +44,7 @@ class ThriftEventConverter
      * @param \org\wso2\carbon\databridge\commons\thrift\data\ThriftEventBundle $thiftEventBundle            
      * @param array $attributes            
      * @return \org\wso2\carbon\databridge\commons\thrift\data\ThriftEventBundle
+     * @throws UnknownAttributeException
      */
     private static function assignAttribute($thiftEventBundle, $attributes)
     {
@@ -66,7 +68,9 @@ class ThriftEventConverter
                 } elseif (is_null($value)) {
                     $thiftEventBundle->stringAttributeList[] = '_null';
                 } else {
-                    // $log->error ( 'Unknown attribute type ' . $value );
+                    $error = 'Unknown attribute type ' . $value;
+                    $log->error ( $error);
+                    throw new UnknownAttributeException($error);
                 }
             }
         }

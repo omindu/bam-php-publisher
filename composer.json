@@ -1,0 +1,16 @@
+{
+	 "authors": [
+	 {
+		 "name": "omindu",
+		 "email": "omindu.dishan@gmail.com",
+		 "role": "Developer"
+	 }
+	 ],
+	 "require": {
+		 "apache/log4php": "dev-master",
+		 "packaged/thrift": "0.9.0"
+	 },
+	 "autoload": {
+        "classmap": ["gen-php/","publisher"]
+	}
+}

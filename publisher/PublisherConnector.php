@@ -1,19 +1,13 @@
 <?php
-include_once __DIR__ . '/../lib/Thrift/ClassLoader/ThriftClassLoader.php';
+namespace publisher;
 
-use Thrift\ClassLoader\ThriftClassLoader;
 
-$loader = new ThriftClassLoader();
-$loader->registerNamespace('Thrift', __DIR__ . '/../lib');
-$loader->register();
 
-include __DIR__ . '/../gen-php/org/wso2/carbon/databridge/commons/thrift/exception/Types.php';
-include __DIR__ . '/../gen-php/org/wso2/carbon/databridge/commons/thrift/service/general/ThriftEventTransmissionService.php';
-include __DIR__ . '/../gen-php/org/wso2/carbon/databridge/commons/thrift/service/secure/ThriftSecureEventTransmissionService.php';
+
 // include '../logger/php/Logger.php';
 
 // Logger::configure('../logger/config.xml');
-
+use Thrift\ClassLoader\ThriftClassLoader;
 use Thrift\Transport\TSocket;
 use Thrift\Transport\TBufferedTransport;
 use Thrift\Protocol\TBinaryProtocolAccelerated;
@@ -57,7 +51,7 @@ class PubllisherConnector
      */
     public function __construct($receiverURL, $authenticationURL, $username, $password)
     {
-        $this->log = Logger::getLogger('PublisherLogger');
+        $this->log = \Logger::getLogger('PublisherLogger');
         $this->receiverURL = $receiverURL;
         $this->authenticationURL = $authenticationURL;
         $this->username = $username;
@@ -77,14 +71,16 @@ class PubllisherConnector
      * 
      * @throws ConnectionException
      */
+    
+    //TODO Recode!!
     private function connect()
     {
         try {
             $this->secureClient = new ThriftSecureEventTransmissionServiceClient($this->secureProtocol);
             $this->sessionId = $this->secureClient->connect($this->username, $this->password);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             // $this->log->error('Error connecting the secure client - '.$e);
-            $this->sessionId = 'cf42323c-f6a3-4b02-a797-19eb820d4fd7';
+            $this->sessionId = '94509fe0-3325-4029-875a-1718ce210252';
             //throw new ConnectionException('Error connecting the secure client. '.$e->getMessage(), $e);
         }
     }

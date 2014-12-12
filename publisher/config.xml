@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration xmlns="http://logging.apache.org/log4php/">
+ 
+    <appender name="console" class="LoggerAppenderConsole">
+    	<layout class="LoggerLayoutPattern">
+            <param name="conversionPattern" value="[%date] %-5p {%C} %message%newline" />
+        </layout>
+    </appender>
+    
+    <appender name="fileLog" class="LoggerAppenderFile" >
+    	
+        <layout class="LoggerLayoutPattern">
+            <param name="conversionPattern" value="[%date] %-5p {%C} %message%newline" />
+        </layout>
+        
+        <param name="file" value="log.log" />
+    </appender>
+ 
+    <logger name="PublisherLogger">
+    	<level value="ERROR" />
+        <appender_ref ref="fileLog" />
+    </logger>
+    
+    <root>
+        <level value="DEBUG" />
+        <appender_ref ref="console" />
+    </root>
+</configuration>

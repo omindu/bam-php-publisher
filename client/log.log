@@ -1,2 +1,0 @@
-[2014-12-02T15:08:35+05:30] WARN  {Publisher} My third message.
-[2014-12-02T15:08:35+05:30] INFO  {Publisher} Receiver url scheme not defined, Using TCP.

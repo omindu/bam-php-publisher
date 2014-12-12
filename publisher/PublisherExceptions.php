@@ -1,4 +1,7 @@
 <?php
+namespace publisher;
+
+use \Exception;
 
 class MalformedURLException extends Exception
 {
@@ -36,11 +39,11 @@ class ConnectionException extends Exception
     }
 }
 
-try {
-    
-    $e = new Exception('Original');
-    throw new MalformedURLException("Custom", $e);
-} catch (MalformedURLException $e) {
-    
-    var_dump($e);
+class UnknownAttributeException extends Exception
+{
+
+    public function __construct($message, $error = null)
+    {
+        parent::__construct($message, null, $error);
+    }
 }

@@ -1,0 +1,52 @@
+[2014-12-12T06:41:14+05:30] ERROR {publisher\PubllisherConnector} Error creating the publisher protocol - exception 'Thrift\Exception\TException' with message 'TSocket: Could not connect to tcp://192.168.1.2:123 (Connection refused [61])' in /Library/WebServer/Documents/ComposerTest/Publisher/vendor/packaged/thrift/src/Thrift/Transport/TSocket.php:235
+Stack trace:
+#0 /Library/WebServer/Documents/ComposerTest/Publisher/vendor/packaged/thrift/src/Thrift/Transport/TBufferedTransport.php(86): Thrift\Transport\TSocket->open()
+#1 /Library/WebServer/Documents/ComposerTest/Publisher/publisher/PublisherConnector.php(121): Thrift\Transport\TBufferedTransport->open()
+#2 /Library/WebServer/Documents/ComposerTest/Publisher/publisher/PublisherConnector.php(66): publisher\PubllisherConnector->createProtocol()
+#3 /Library/WebServer/Documents/ComposerTest/Publisher/publisher/Publisher.php(84): publisher\PubllisherConnector->__construct(Array, Array, 'admin', 'admin')
+#4 /Library/WebServer/Documents/ComposerTest/Publisher/SampleClient.php(29): publisher\Publisher->__construct('tcp://192.168.1...', 'admin', 'admin', 'ssl://192.168.1...')
+#5 {main}
+[2014-12-12T06:41:47+05:30] ERROR {publisher\Publisher} Receiver URL cannot be NULL
+[2014-12-12T07:24:23+05:30] ERROR {publisher\Publisher} Receiver URL cannot be NULL
+[2014-12-12T07:24:39+05:30] ERROR {publisher\PubllisherConnector} Error creating the secure protocol - exception 'Thrift\Exception\TException' with message 'TSocket: Could not connect to ssl://192.168.1.2:7711 ( [0])' in /Library/WebServer/Documents/ComposerTest/Publisher/vendor/packaged/thrift/src/Thrift/Transport/TSocket.php:235
+Stack trace:
+#0 /Library/WebServer/Documents/ComposerTest/Publisher/vendor/packaged/thrift/src/Thrift/Transport/TBufferedTransport.php(86): Thrift\Transport\TSocket->open()
+#1 /Library/WebServer/Documents/ComposerTest/Publisher/publisher/PublisherConnector.php(99): Thrift\Transport\TBufferedTransport->open()
+#2 /Library/WebServer/Documents/ComposerTest/Publisher/publisher/PublisherConnector.php(66): publisher\PubllisherConnector->createProtocol()
+#3 /Library/WebServer/Documents/ComposerTest/Publisher/publisher/Publisher.php(83): publisher\PubllisherConnector->__construct(Array, Array, 'admin', 'admin')
+#4 /Library/WebServer/Documents/ComposerTest/Publisher/SampleClient.php(24): publisher\Publisher->__construct('tcp://192.168.1...', 'admin', 'admin', 'ssl://192.168.1...')
+#5 {main}
+[2014-12-12T07:25:10+05:30] ERROR {publisher\PubllisherConnector} Error creating the publisher protocol - exception 'Thrift\Exception\TException' with message 'TSocket: Could not connect to tcp://192.168.1.2:7761 (Connection refused [61])' in /Library/WebServer/Documents/ComposerTest/Publisher/vendor/packaged/thrift/src/Thrift/Transport/TSocket.php:235
+Stack trace:
+#0 /Library/WebServer/Documents/ComposerTest/Publisher/vendor/packaged/thrift/src/Thrift/Transport/TBufferedTransport.php(86): Thrift\Transport\TSocket->open()
+#1 /Library/WebServer/Documents/ComposerTest/Publisher/publisher/PublisherConnector.php(121): Thrift\Transport\TBufferedTransport->open()
+#2 /Library/WebServer/Documents/ComposerTest/Publisher/publisher/PublisherConnector.php(66): publisher\PubllisherConnector->createProtocol()
+#3 /Library/WebServer/Documents/ComposerTest/Publisher/publisher/Publisher.php(83): publisher\PubllisherConnector->__construct(Array, Array, 'admin', 'admin')
+#4 /Library/WebServer/Documents/ComposerTest/Publisher/SampleClient.php(24): publisher\Publisher->__construct('tcp://192.168.1...', 'admin', 'admin', 'ssl://192.168.1...')
+#5 {main}
+[2014-12-12T07:25:19+05:30] ERROR {publisher\PubllisherConnector} Error creating the publisher protocol - exception 'Thrift\Exception\TException' with message 'TSocket: Could not connect to tcp://192.168.1.2:7761 (Connection refused [61])' in /Library/WebServer/Documents/ComposerTest/Publisher/vendor/packaged/thrift/src/Thrift/Transport/TSocket.php:235
+Stack trace:
+#0 /Library/WebServer/Documents/ComposerTest/Publisher/vendor/packaged/thrift/src/Thrift/Transport/TBufferedTransport.php(86): Thrift\Transport\TSocket->open()
+#1 /Library/WebServer/Documents/ComposerTest/Publisher/publisher/PublisherConnector.php(121): Thrift\Transport\TBufferedTransport->open()
+#2 /Library/WebServer/Documents/ComposerTest/Publisher/publisher/PublisherConnector.php(66): publisher\PubllisherConnector->createProtocol()
+#3 /Library/WebServer/Documents/ComposerTest/Publisher/publisher/Publisher.php(83): publisher\PubllisherConnector->__construct(Array, Array, 'admin', 'admin')
+#4 /Library/WebServer/Documents/ComposerTest/Publisher/SampleClient.php(24): publisher\Publisher->__construct('tcp://192.168.1...', 'admin', 'admin', 'ssl://192.168.1...')
+#5 {main}
+[2014-12-12T07:26:50+05:30] ERROR {publisher\PubllisherConnector} Error creating the secure protocol - exception 'Thrift\Exception\TException' with message 'TSocket: Could not connect to ssl://192.168.1.2:7711 ( [0])' in /Library/WebServer/Documents/ComposerTest/Publisher/vendor/packaged/thrift/src/Thrift/Transport/TSocket.php:235
+Stack trace:
+#0 /Library/WebServer/Documents/ComposerTest/Publisher/vendor/packaged/thrift/src/Thrift/Transport/TBufferedTransport.php(86): Thrift\Transport\TSocket->open()
+#1 /Library/WebServer/Documents/ComposerTest/Publisher/publisher/PublisherConnector.php(99): Thrift\Transport\TBufferedTransport->open()
+#2 /Library/WebServer/Documents/ComposerTest/Publisher/publisher/PublisherConnector.php(66): publisher\PubllisherConnector->createProtocol()
+#3 /Library/WebServer/Documents/ComposerTest/Publisher/publisher/Publisher.php(83): publisher\PubllisherConnector->__construct(Array, Array, 'admin', 'admin')
+#4 /Library/WebServer/Documents/ComposerTest/Publisher/SampleClient.php(24): publisher\Publisher->__construct('tcp://192.168.1...', 'admin', 'admin', 'ssl://192.168.1...')
+#5 {main}
+[2014-12-12T07:27:16+05:30] ERROR {publisher\Publisher} Session expired.
+[2014-12-12T07:27:21+05:30] ERROR {publisher\Publisher} Session expired.
+[2014-12-12T07:43:44+05:30] ERROR {publisher\PubllisherConnector} Error creating the secure protocol - exception 'Thrift\Exception\TException' with message 'TSocket: Could not connect to ssl://192.168.1.2:7711 (Connection refused [61])' in /Library/WebServer/Documents/ComposerTest/Publisher/vendor/packaged/thrift/src/Thrift/Transport/TSocket.php:235
+Stack trace:
+#0 /Library/WebServer/Documents/ComposerTest/Publisher/vendor/packaged/thrift/src/Thrift/Transport/TBufferedTransport.php(86): Thrift\Transport\TSocket->open()
+#1 /Library/WebServer/Documents/ComposerTest/Publisher/publisher/PublisherConnector.php(99): Thrift\Transport\TBufferedTransport->open()
+#2 /Library/WebServer/Documents/ComposerTest/Publisher/publisher/PublisherConnector.php(66): publisher\PubllisherConnector->createProtocol()
+#3 /Library/WebServer/Documents/ComposerTest/Publisher/publisher/Publisher.php(84): publisher\PubllisherConnector->__construct(Array, Array, 'admin', 'admin')
+#4 /Library/WebServer/Documents/ComposerTest/Publisher/SampleClient.php(22): publisher\Publisher->__construct('tcp://192.168.1...', 'admin', 'admin', 'ssl://192.168.1...')
+#5 {main}

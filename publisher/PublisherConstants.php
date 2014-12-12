@@ -1,5 +1,7 @@
 <?php
 
+namespace publisher;
+
 class PublisherConstants
 {
 

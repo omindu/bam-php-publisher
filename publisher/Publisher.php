@@ -1,10 +1,7 @@
 <?php
-include_once 'PublisherConstants.php';
-include_once 'PublisherConnector.php';
-include_once '../logger/php/Logger.php';
-include_once 'PublisherExceptions.php';
+namespace publisher;
 
-Logger::configure('../logger/config.xml');
+
 
 use org\wso2\carbon\databridge\commons\thrift\exception\ThriftNoStreamDefinitionExistException;
 use org\wso2\carbon\databridge\commons\thrift\service\secure\ThriftSecureEventTransmissionServiceClient;
@@ -71,7 +68,8 @@ class Publisher
      */
     public function __construct($receiverURL, $username, $password, $authenticationURL = NULL)
     {
-        $this->log = Logger::getLogger('PublisherLogger');
+        \Logger::configure(__DIR__ . '/config.xml');
+        $this->log = \Logger::getLogger('PublisherLogger');
         if ($receiverURL) {
             $this->setReceiverURL($receiverURL);
         } else {
@@ -209,32 +207,30 @@ class Publisher
      */
     public function addStreamDefinition($streamDefinision)
     {
-        
-        // handle
         try {
             return $this->connector->getPublisherClient()->defineStream($this->connector->getSessionId(), $streamDefinision);
         } catch (ThriftDifferentStreamDefinitionAlreadyDefinedException $e) {
+            $this->log->error('Stream definition already exist! ' . $e->getMessage(), $e);
             throw new StreamDefinitionException('Stream definition already exist! ' . $e->getMessage(), $e);
-            // TODO log
         } catch (ThriftMalformedStreamDefinitionException $e) {
+            $this->log->error('Malformed stream definition! ' . $e->getMessage(), $e);
             throw new StreamDefinitionException('Malformed stream definition! ' . $e->getMessage(), $e);
-            // TODO log
         } catch (ThriftStreamDefinitionException $e) {
+            $this->log->error('Error adding the stream definition! ' . $e->getMessage(), $e);
             throw new StreamDefinitionException('Error adding the stream definition! ' . $e->getMessage(), $e);
-            // TODO log
         }
     }
-    
 
     /**
      * Publish event to BAM server
      *
      * @param Event $event            
+     * @throws UnknownAttributeException
      */
     public function publish($event)
     {
         // $connector = new ThriftSecureEventTransmissionServiceClient($input); //<-remove!!
         $eventBundle = ThriftEventConverter::covertToThriftBundle($event, $this->connector->getSessionId());
-        $this->connector->publish($eventBundle);
+        $this->connector->getPublisherClient()->publish($eventBundle);
     }
 }
