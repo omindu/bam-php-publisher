@@ -49,7 +49,7 @@ class ThriftEventConverter
     private static function assignAttribute($thiftEventBundle, $attributes)
     {
         // $thiftEventBundle = new ThriftEventBundle (); // /<-remove
-        // $log = Logger::getLogger ( 'PublisherLogger' );
+        $log = \Logger::getLogger ( PublisherConstants::LOGGER_NAME );
         if ($attributes) {
             foreach ($attributes as $value) {
                 

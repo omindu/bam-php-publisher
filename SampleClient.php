@@ -1,18 +1,17 @@
 <?php
-use Thrift\Transport\TSocket;
-use Thrift\Transport\TBufferedTransport;
-use Thrift\Protocol\TBinaryProtocolAccelerated;
-use Thrift\ClassLoader\ThriftClassLoader;
+error_reporting(E_ALL);
+include_once __DIR__ . '/vendor/autoload.php';
+
+
 use org\wso2\carbon\databridge\commons\thrift\service\general\ThriftEventTransmissionServiceClient;
 use publisher\Publisher;
 use publisher\Event;
 
 
-error_reporting(E_ALL);
-include_once __DIR__ . '/vendor/autoload.php';
 
-$receiverURL = 'tcp://192.168.1.2:7611';//'tcp://10.100.5.198';
-$authenticationURL = 'ssl://192.168.1.2:7711';//'ssl://10.100.5.198';
+
+$receiverURL = 'tcp://192.168.1.3:761';//'tcp://10.100.5.198';
+$authenticationURL = 'https://localhost:9443';//'ssl://10.100.5.198';
 $username = 'admin';
 $password = 'admin';
 
@@ -39,7 +38,7 @@ try {
 	$event->setPayloadData($payloadData);
 	$event->setArbitraryDataMap($arbitraryDataMap);
 	
-	$publisher->publish($event);
+	//$publisher->publish($event);
     	
     
 }catch(Exception $e){
