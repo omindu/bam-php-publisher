@@ -14,7 +14,7 @@ class PublisherConstants
 
     const DEFAULT_SESSION_TIMEOUT_SEC = 1700;
 
-    const PUBLISHER_AUTHENTICATION_SERVICE_URL = '/com.test/services/test';
+    const PUBLISHER_AUTHENTICATION_SERVICE_URL = '/restauthenticator/getsessionid';
     
     const CAFILE_PATH = capath;
     

@@ -79,7 +79,7 @@ class Authenticator
         $errorStatus = curl_errno($curl);
         $statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         
-        echo $errorStatus;
+        //echo $errorStatus;
         //var_dump(curl_error($curl));
         //var_dump($response);
         //var_dump(curl_getinfo($curl));
