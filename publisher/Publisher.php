@@ -53,6 +53,12 @@ class Publisher
      * @var log4j Logger
      */
     private $log;
+    
+    /**
+     * 
+     * @var PublisherConfiguration
+     */
+    private $configuration;
 
     /**
      *
@@ -67,9 +73,13 @@ class Publisher
      *            
      * @throws NullPointerException
      */
-    public function __construct($receiverURL, $username, $password, $authenticationURL = NULL)
+    public function __construct($receiverURL, $username, $password, $authenticationURL = NULL, PublisherConfiguration $configuration = null)
     {
         $this->configureLogger();
+        
+        if (!$configuration) {
+            $configuration = new PublisherConfiguration();
+        }
         
         if ($receiverURL) {
             $this->setReceiverURL($receiverURL);
@@ -82,31 +92,13 @@ class Publisher
         $this->setAuthenticationURL($authenticationURL);
         $this->username = $username;
         $this->password = $password;
-        $this->connector = new PubllisherConnector($this->receiverURL, $this->authenticationURL, $username, $password);
+        $this->connector = new PubllisherConnector($this->receiverURL, $this->authenticationURL, $username, $password, $configuration);
     }
 
     private function configureLogger()
     {
-        $loggerConfigFile;
-        $loggerName;
-        
-        if (PublisherProperties::getLoggerConfigFile()) {
-            
-            $loggerConfigFile = PublisherProperties::getLoggerConfigFile();
-            
-            if (PublisherProperties::getLoggerName()) {
-                $loggerName = PublisherProperties::getLoggerName();
-            } else {
-                $loggerName = PublisherConstants::LOGGER_NAME;
-            }
-        } else {
-            $loggerConfigFile = PublisherConstants::LOG4J_CONFIG_FILE_PATH;
-            $loggerName = PublisherConstants::LOGGER_NAME;
-            PublisherProperties::setLoggerName($loggerName);
-        }
-        
-        $this->log = \Logger::configure($loggerConfigFile);
-        \Logger::getLogger($loggerName);
+        \Logger::configure(PublisherConstants::LOG4J_CONFIG_FILE_PATH);
+        $this->log = \Logger::getLogger(PublisherConstants::LOGGER_NAME);
     }
 
     /**

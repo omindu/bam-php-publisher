@@ -14,7 +14,7 @@
             <param name="conversionPattern" value="[%date] %-5p {%C} %message%newline%ex" />
         </layout>
         
-        <param name="file" value="log.log" />
+        <param name="file" value="publisherLog/log.log" />
     </appender>
  
     <logger name="PublisherLogger">

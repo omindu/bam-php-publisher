@@ -36,27 +36,30 @@ class PubllisherConnector
     private $log;
 
     private $authenticator;
+    
+    private $configuration;
 
     /**
      *
      * @param array $receiverURL            
      * @param array $authenticationURL            
      * @param string $username            
-     * @param string $password 
-     * 
+     * @param string $password            
+     *
      * @throws ConnectionException
-     * @throws NullPointerException        
+     * @throws NullPointerException
      */
-    public function __construct($receiverURL, $authenticationURL, $username, $password)
+    public function __construct(array $receiverURL, array $authenticationURL, $username, $password, PublisherConfiguration $configuration)
     {
-        $this->log = \Logger::getLogger(PublisherProperties::getLoggerName());
+        $this->log = \Logger::getLogger(PublisherConstants::LOGGER_NAME);
         $this->receiverURL = $receiverURL;
         $this->authenticationURL = $authenticationURL;
         $this->username = $username;
         $this->password = $password;
+        $this->configuration = $configuration;
         
         $this->createProtocol();
-        $this->authenticator = new Authenticator($authenticationURL, $username, $password);
+        $this->authenticator = new Authenticator($authenticationURL, $username, $password, $configuration);
     }
 
     /**
@@ -72,7 +75,7 @@ class PubllisherConnector
 
     /**
      * Creates thrift protoclo for event transmissions via TCP
-     * 
+     *
      * @throws ConnectionException
      */
     private function createProtocol()
@@ -86,14 +89,14 @@ class PubllisherConnector
             if ($e->getCode() == TTransportException::ALREADY_OPEN) {
                 $this->log->warn('Socket already open - ' . $e);
             } else {
-                $error = 'Error creating the publisher protocol.';
+                $error = 'Error creating the publisher protocol with '.$socket->getHost().':'.$socket->getPort();
                 $this->log->error($error, $e);
                 throw new ConnectionException($error, $e);
             }
         } catch (TException $e) {
-            $error = 'Error creating the publisher protocol.';
-            $this->log->error($error , $e);
-            throw new ConnectionException('Error creating the publisher protocol.', $e);
+            $error = 'Error creating the publisher protocol with '.$socket->getHost().':'.$socket->getPort();
+            $this->log->error($error, $e);
+            throw new ConnectionException($error, $e);
         }
     }
 
