@@ -14,10 +14,10 @@
 	 }
 	 ],
 	 "require": {
-		 "apache/log4php": "dev-master",
+		 "apache/log4php": "2.3.0",
 		 "packaged/thrift": "0.9.0"
 	 },
 	 "autoload": {
-        "classmap": ["gen-php/","publisher"]
+        "classmap": ["gen-php/","publisher/"]
 	}
 }
