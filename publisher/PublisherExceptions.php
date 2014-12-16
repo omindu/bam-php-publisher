@@ -17,28 +17,19 @@ class PublisherException extends Exception
     public static $UNKNOWN_ATTRIBUTE_EXCEPTION = 5;
 
     public static $AUTHENTICATION_EXCEPTION = 6;
+    
+    public static $EVENT_PUBLISH_EXCEPTION = 7;
 
-    private static $log = null;
+
 
     public function __construct($message, $errorCode = null, $error = null)
     {
         
         parent::__construct($message, $errorCode, $error);
-        PublisherException::logError($message, $errorCode, $error) ;
+        
     }
 
-    private static function logError($message, $errorCode, $error)
-    {
-        if (! PublisherException::$log) {
-            PublisherException::$log = \Logger::getLogger(PublisherConstants::LOGGER_NAME);
-        }
-        
-        if ($error) {
-            PublisherException::$log->error($message . ' ' . $error);
-        } else {
-            PublisherException::$log->error($message);
-        }
-    }
+
 }
 
 class MalformedURLException extends PublisherException
@@ -77,7 +68,7 @@ class ConnectionException extends PublisherException
     }
 }
 
-class UnknownAttributeException extends PublisherException
+class UnknownEventAttributeException extends PublisherException
 {
 
     public function __construct($message, $error = null)
@@ -92,5 +83,14 @@ class AuthenticationException extends PublisherException
     public function __construct($message, $error = null)
     {
         parent::__construct($message, PublisherException::$AUTHENTICATION_EXCEPTION, $error);
+    }
+}
+
+class EventPublishException extends PublisherException
+{
+
+    public function __construct($message, $error = null)
+    {
+        parent::__construct($message, PublisherException::$EVENT_PUBLISH_EXCEPTION, $error);
     }
 }

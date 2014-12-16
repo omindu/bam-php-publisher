@@ -9,6 +9,7 @@ use org\wso2\carbon\databridge\commons\thrift\exception\ThriftMalformedStreamDef
 use org\wso2\carbon\databridge\commons\thrift\exception\ThriftStreamDefinitionException;
 use publisher\NullPointerException;
 use publisher\MalformedURLException;
+use org\wso2\carbon\databridge\commons\thrift\exception\ThriftUndefinedEventTypeException;
 
 class Publisher
 {
@@ -66,16 +67,15 @@ class Publisher
      *            
      * @throws NullPointerException
      */
-    
-    
     public function __construct($receiverURL, $username, $password, $authenticationURL = NULL)
     {
-        \Logger::configure(PublisherConstants::LOG4J_CONFIG_FILE_PATH);
-        $this->log = \Logger::getLogger(PublisherConstants::LOGGER_NAME);
+        $this->configureLogger();
+        
         if ($receiverURL) {
             $this->setReceiverURL($receiverURL);
         } else {
             $error = 'Receiver URL cannot be NULL';
+            $this->log->error($error);
             throw new NullPointerException($error);
         }
         
@@ -83,6 +83,30 @@ class Publisher
         $this->username = $username;
         $this->password = $password;
         $this->connector = new PubllisherConnector($this->receiverURL, $this->authenticationURL, $username, $password);
+    }
+
+    private function configureLogger()
+    {
+        $loggerConfigFile;
+        $loggerName;
+        
+        if (PublisherProperties::getLoggerConfigFile()) {
+            
+            $loggerConfigFile = PublisherProperties::getLoggerConfigFile();
+            
+            if (PublisherProperties::getLoggerName()) {
+                $loggerName = PublisherProperties::getLoggerName();
+            } else {
+                $loggerName = PublisherConstants::LOGGER_NAME;
+            }
+        } else {
+            $loggerConfigFile = PublisherConstants::LOG4J_CONFIG_FILE_PATH;
+            $loggerName = PublisherConstants::LOGGER_NAME;
+            PublisherProperties::setLoggerName($loggerName);
+        }
+        
+        $this->log = \Logger::configure($loggerConfigFile);
+        \Logger::getLogger($loggerName);
     }
 
     /**
@@ -121,7 +145,8 @@ class Publisher
             
             $this->receiverURL = $url;
         } else {
-            $error = "Invalid Receiver URL '" . $receiverURL . "'. Receiver URL should be in the form of [tcp|ssl]://[host]:[port]";
+            $error = "Invalid Receiver URL '" . $receiverURL . "'. Receiver URL should be in the form of tcp://[host]:[port]";
+            $this->log->error($error);
             throw new NullPointerException($error);
         }
     }
@@ -158,12 +183,13 @@ class Publisher
                     $this->log->info('BAM secure server url scheme not defined, Using https.');
                 } elseif ($url['scheme'] != 'https') {
                     
-                    $this->log->info('BAM secure server url scheme is not https. Provided \''.$url['scheme'].'\' instead. Switching to https');
+                    $this->log->info('BAM secure server url scheme is not https. Provided \'' . $url['scheme'] . '\' instead. Switching to https');
                 }
                 
                 $this->authenticationURL = $url;
             } else {
                 $error = "Invalid BAM secure server URL: " . $authenticationURL . ". The URL should be in the form of https://[host]:[port]";
+                $this->log->error($error);
                 throw new MalformedURLException($error);
             }
         } else { // if authentication url is not defined construct from receiver url
@@ -190,9 +216,13 @@ class Publisher
         try {
             return $this->connector->getPublisherClient()->findStreamId($this->connector->getSessionId(), $streamName, $streamVersion);
         } catch (ThriftNoStreamDefinitionExistException $e) {
+            $error = 'Stream definition: ' . $streamName . ':' . $streamVersion . ' not found';
+            $this->log->error($error, $e);
             throw new StreamDefinitionException('Stream definition: ' . $streamName . ':' . $streamVersion . ' not found', $e);
         } catch (ThriftSessionExpiredException $e) {
-            $this->log->error('Session expired.');
+            $this->log->error('Session expired.', $e);
+            $this->connector->reconnect();
+            $this->findStream($streamName, $streamVersion);
         }
     }
 
@@ -209,11 +239,21 @@ class Publisher
         try {
             return $this->connector->getPublisherClient()->defineStream($this->connector->getSessionId(), $streamDefinision);
         } catch (ThriftDifferentStreamDefinitionAlreadyDefinedException $e) {
-            throw new StreamDefinitionException('Stream definition already exist!', $e);
+            $error = 'Stream definition already exist!';
+            $this->log->error($error, $e);
+            throw new StreamDefinitionException($error, $e);
         } catch (ThriftMalformedStreamDefinitionException $e) {
-            throw new StreamDefinitionException('Malformed stream definition!', $e);
+            $error = 'Malformed stream definition!';
+            $this->log->error($error, $e);
+            throw new StreamDefinitionException($error, $e);
         } catch (ThriftStreamDefinitionException $e) {
-            throw new StreamDefinitionException('Error adding the stream definition!', $e);
+            $error = 'Error adding the stream definition!';
+            $this->log->error($error, $e);
+            throw new StreamDefinitionException($error, $e);
+        } catch (ThriftSessionExpiredException $e) {
+            $this->log->error('Session expired.', $e);
+            $this->connector->reconnect();
+            $this->addStreamDefinition($streamDefinision);
         }
     }
 
@@ -221,12 +261,23 @@ class Publisher
      * Publish event to BAM server
      *
      * @param Event $event            
-     * @throws UnknownAttributeException
+     * @throws UnknownEventAttributeException
      */
     public function publish($event)
     {
         // $connector = new ThriftSecureEventTransmissionServiceClient($input); //<-remove!!
         $eventBundle = ThriftEventConverter::covertToThriftBundle($event, $this->connector->getSessionId());
-        $this->connector->getPublisherClient()->publish($eventBundle);
+        try {
+            $this->connector->getPublisherClient()->publish($eventBundle);
+        } catch (ThriftUndefinedEventTypeException $e) {
+            
+            $error = 'Error publishing the event to stream definition!';
+            $this->log->error($error, $e);
+            throw new EventPublishException($error);
+        } catch (ThriftSessionExpiredException $e) {
+            $this->log->error('Session expired.', $e);
+            $this->connector->reconnect();
+            $this->publish($event);
+        }
     }
 }

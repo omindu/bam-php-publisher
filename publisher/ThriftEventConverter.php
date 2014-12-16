@@ -2,6 +2,7 @@
 namespace publisher;
 
 use org\wso2\carbon\databridge\commons\thrift\data\ThriftEventBundle;
+use publisher\UnknownEventAttributeException;
 
 class ThriftEventConverter
 {
@@ -14,7 +15,7 @@ class ThriftEventConverter
      * @param string $sessionId            
      * @param \org\wso2\carbon\databridge\commons\thrift\data\ThriftEventBundle $eventBundle            
      * @return \org\wso2\carbon\databridge\commons\thrift\data\ThriftEventBundle
-     * @throws UnknownAttributeException
+     * @throws UnknownEventAttributeException
      */
     public static function covertToThriftBundle($event, $sessionId, $thiftEventBundle = NULL)
     {
@@ -44,7 +45,7 @@ class ThriftEventConverter
      * @param \org\wso2\carbon\databridge\commons\thrift\data\ThriftEventBundle $thiftEventBundle            
      * @param array $attributes            
      * @return \org\wso2\carbon\databridge\commons\thrift\data\ThriftEventBundle
-     * @throws UnknownAttributeException
+     * @throws UnknownEventAttributeException::
      */
     private static function assignAttribute($thiftEventBundle, $attributes)
     {
@@ -70,7 +71,7 @@ class ThriftEventConverter
                 } else {
                     $error = 'Unknown attribute type ' . $value;
                     $log->error ( $error);
-                    throw new UnknownAttributeException($error);
+                    throw new UnknownEventAttributeException($error);
                 }
             }
         }

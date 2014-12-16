@@ -4,14 +4,14 @@
  
     <appender name="console" class="LoggerAppenderConsole">
     	<layout class="LoggerLayoutPattern">
-            <param name="conversionPattern" value="[%date] %-5p {%C} %message%newline" />
+            <param name="conversionPattern" value="[%date] %-5p {%C} %message%newline%ex" />
         </layout>
     </appender>
     
     <appender name="fileLog" class="LoggerAppenderFile" >
     	
         <layout class="LoggerLayoutPattern">
-            <param name="conversionPattern" value="[%date] %-5p {%C} %message%newline" />
+            <param name="conversionPattern" value="[%date] %-5p {%C} %message%newline%ex" />
         </layout>
         
         <param name="file" value="log.log" />

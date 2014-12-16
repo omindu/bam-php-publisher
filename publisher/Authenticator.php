@@ -13,7 +13,7 @@ class Authenticator
     private $password;
 
     private $authenticationURL;
-    
+
     private $log;
 
     /**
@@ -48,28 +48,28 @@ class Authenticator
      */
     public function Authenticate()
     {
-        $credentials = array(
-            'username' => $this->username,
-            'password' => $this->password
-        );
-        
-        $jsonCredentials = json_encode($credentials);
-        
         $curl = curl_init($this->authenticationURLBuilder($this->authenticationURL));
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
-        curl_setopt($curl, CURLOPT_CAINFO, PublisherConstants::CAFILE_PATH);
+        
+        if (PublisherProperties::getVerifyPeer()) {
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
+            
+            if (PublisherProperties::getCaFile()) {
+                curl_setopt($curl, CURLOPT_CAINFO, PublisherProperties::getCaFile());
+            } else {
+                curl_setopt($curl, CURLOPT_CAINFO, PublisherConstants::CAFILE_PATH);
+            }
+        }
+        
+        curl_setopt($curl, CURLOPT_USERPWD, $this->username . ':' . $this->password);
+        curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
         
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_POST, 1);
         
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-            "Content-Type: application/json; charset=UTF-8"
-        ));
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $jsonCredentials);
         $response = curl_exec($curl);
         $errorStatus = curl_errno($curl);
         $statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        
         echo $errorStatus;
         var_dump(curl_error($curl));
         var_dump($response);
@@ -78,24 +78,23 @@ class Authenticator
         if ($errorStatus !== 0) {
             
             $error = "Error connectiong to secure authentication service. " . curl_error($curl);
+            $this->log->error($error);
             throw new ConnectionException($error);
         } elseif ($statusCode !== 200) {
-            $error = "";
-            // TODO
+            $error = "Authentication error.\nError Code: " . $statusCode . "\n" . $response;
+            $this->log->error($error);
             throw new AuthenticationException($error);
         }
         
+        $sessionID = base64_decode($response);
         curl_close($curl);
         
-        // TODO handle response
-        $var = explode(' - ', $response);
-        
-        return $var[1];
+        return $sessionID;
     }
 
     private function authenticationURLBuilder($authenticationURL)
     {
-        return $authenticationURL['scheme'] . '://' . $authenticationURL['host'] . ':' . $authenticationURL['port']. PublisherConstants::PUBLISHER_AUTHENTICATION_SERVICE_URL;
+        return $authenticationURL['scheme'] . '://' . $authenticationURL['host'] . ':' . $authenticationURL['port'] . PublisherConstants::PUBLISHER_AUTHENTICATION_SERVICE_URL;
     }
 }
 

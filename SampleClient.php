@@ -10,19 +10,19 @@ use publisher\Event;
 
 
 
-$receiverURL = 'tcp://192.168.1.3:761';//'tcp://10.100.5.198';
-$authenticationURL = 'https://localhost:9443';//'ssl://10.100.5.198';
-$username = 'admin';
+$receiverURL = 'tcp://10.100.5.198:7611';//'tcp://10.100.5.198';
+$authenticationURL = 'https://localhost:9443';
+$username = 'admi';
 $password = 'admin';
 
 try {
 
     
     $publisher = new Publisher($receiverURL, $username, $password, $authenticationURL);
-    echo $publisher->findStream ( "online_news_stats_1", "1.0.0" );
+    echo $publisher->findStream ( "online_news_stats_1", "1.0" );
     
 	$streamDefinition = "{ 'name':'test_stream_definition', "
-			             ."'version':'5.0.0', "
+			             ."'version':'1.0.0', "
 			             ."'metaData':[{'name':'publisherIP','type':'STRING'}],"
 					      ."'payloadData':[ {'name':'message','type':'STRING'},"
 							                 ."{'name':'from','type':'STRING'} ] }";
@@ -39,6 +39,8 @@ try {
 	$event->setArbitraryDataMap($arbitraryDataMap);
 	
 	//$publisher->publish($event);
+
+	
     	
     
 }catch(Exception $e){

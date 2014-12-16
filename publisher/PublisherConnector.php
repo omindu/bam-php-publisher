@@ -42,11 +42,14 @@ class PubllisherConnector
      * @param array $receiverURL            
      * @param array $authenticationURL            
      * @param string $username            
-     * @param string $password            
+     * @param string $password 
+     * 
+     * @throws ConnectionException
+     * @throws NullPointerException        
      */
     public function __construct($receiverURL, $authenticationURL, $username, $password)
     {
-        $this->log = \Logger::getLogger(PublisherConstants::LOGGER_NAME);
+        $this->log = \Logger::getLogger(PublisherProperties::getLoggerName());
         $this->receiverURL = $receiverURL;
         $this->authenticationURL = $authenticationURL;
         $this->username = $username;
@@ -55,19 +58,22 @@ class PubllisherConnector
         $this->createProtocol();
         $this->authenticator = new Authenticator($authenticationURL, $username, $password);
     }
-    
+
     /**
+     *
      * @throws ConnectionException
      * @throws AuthenticationException
      */
     private function connect()
     {
         $this->sessionId = $this->authenticator->Authenticate();
-        //$this->sessionId = '94509fe0-3325-4029-875a-1718ce210252';
+        // $this->sessionId = '94509fe0-3325-4029-875a-1718ce210252';
     }
 
     /**
      * Creates thrift protoclo for event transmissions via TCP
+     * 
+     * @throws ConnectionException
      */
     private function createProtocol()
     {
@@ -80,11 +86,13 @@ class PubllisherConnector
             if ($e->getCode() == TTransportException::ALREADY_OPEN) {
                 $this->log->warn('Socket already open - ' . $e);
             } else {
-                
-                throw new ConnectionException('Error creating the publisher protocol.', $e);
+                $error = 'Error creating the publisher protocol.';
+                $this->log->error($error, $e);
+                throw new ConnectionException($error, $e);
             }
         } catch (TException $e) {
-            
+            $error = 'Error creating the publisher protocol.';
+            $this->log->error($error , $e);
             throw new ConnectionException('Error creating the publisher protocol.', $e);
         }
     }
@@ -93,6 +101,9 @@ class PubllisherConnector
      * Return the session ID for the current active session
      *
      * @return Session ID as a string upon successful connection
+     *        
+     * @throws ConnectionException
+     * @throws AuthenticationException
      */
     public function getSessionId()
     {
@@ -120,6 +131,19 @@ class PubllisherConnector
         }
         
         return $this->publisherClient;
+    }
+
+    /**
+     * Used to obtain the session ID in case of a ThriftSessionExpireException
+     *
+     * @throws ConnectionException
+     * @throws AuthenticationException
+     */
+    public function reconnect()
+    {
+        $this->log->info('Session expired. Reconnecting...');
+        $this->connect();
+        $this->sessionStartTime = time();
     }
 
     /**
