@@ -1,7 +1,6 @@
 <?php
 namespace publisher;
 
-include_once __DIR__ . '/../vendor/autoload.php';
 use publisher\ConnectionException;
 use publisher\AuthenticationException;
 
