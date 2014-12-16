@@ -19,7 +19,7 @@ $password = 'admin';
 
 try {
 
-    $configuration = new PublisherConfiguration(false, PublisherConstants::CAFILE_PATH);
+    $configuration = new PublisherConfiguration(true, PublisherConstants::CAFILE_PATH);
     $publisher = new Publisher($receiverURL, $username, $password, $authenticationURL, $configuration);
     
     echo $publisher->findStream ( "online_news_stats", "1.0.0" );
