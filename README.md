@@ -9,8 +9,18 @@ The publisher uses [Apache Thrift] to publish data sent by the PHP client to the
 - PHP 5.5.x with curl
 - WSO2 BAM 2.4.1
 
+## Dependancies
+
+- [Apache log4php] v2.3.0
+- [Apache Thrift] v0.9
+
 ## Getting Started
+
+### Installing the Publisher
+
+
 
 
 [WSO2 Business Activity Monitor]:http://wso2.com/products/business-activity-monitor/
 [Apache Thrift]:https://thrift.apache.org/
+[Apache log4php]:http://logging.apache.org/log4php/index.html
