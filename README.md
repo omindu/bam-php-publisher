@@ -6,8 +6,8 @@ The publisher uses [Apache Thrift] to publish data sent by the PHP client to the
 
 ## Prerequisites
 
-- PHP 5.5.x with curl
-- WSO2 BAM 2.4.1
+- PHP 5.5.x or above 
+- WSO2 BAM 2.4.1 or above
 
 ## Dependancies
 
@@ -18,9 +18,20 @@ The publisher uses [Apache Thrift] to publish data sent by the PHP client to the
 
 ### Installing the Publisher
 
+The recommended way of installing the Publisher is via [Composer].
 
+The BAM PHP publisher is added to the [Packagist] archive. Therefore the publisher can be installed to a project by including it as a dependancy in `Composer.json`. When installing via Composer, log4php and thrift dependancies will be automatically installed to the project.
 
+```json
+{
+    "require": {
+        "omindu/php-publisher": "dev-master"
+    }
+}
+```
 
 [WSO2 Business Activity Monitor]:http://wso2.com/products/business-activity-monitor/
 [Apache Thrift]:https://thrift.apache.org/
 [Apache log4php]:http://logging.apache.org/log4php/index.html
+[Composer]:https://getcomposer.org/
+[Packagist]:https://packagist.org/
