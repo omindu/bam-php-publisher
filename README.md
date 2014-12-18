@@ -39,6 +39,10 @@ function defineStream($streamDefinision)
     @throws StreamDefinitionException
     @throws DifferentStreamDefinitionAlreadyDefinedException
     @throws MalformedStreamDefinitionException
+    
+function publish($event)
+    @param Event $event
+    @throws UnknownEventAttributeException    
 ```
 
 ## Getting Started
