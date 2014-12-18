@@ -16,7 +16,7 @@ The publisher uses [Apache Thrift] to publish data sent by the PHP client to the
 
 ## API
 
-#### class Publisher
+#### `class Publisher`
 ```PHP
 function __construct($receiverURL, $username, $password, $authenticationURL)
 
