@@ -45,6 +45,18 @@ function publish($event)
     @throws UnknownEventAttributeException    
 ```
 
+#### `class Event`
+```PHP
+function __construct($streamId, $timeStamp, $metaData , $correlationData, $payloadData , $arbitraryDataMap)
+
+    @param string $streamId - @default null
+    @param string $timeStamp - @default null
+    @param string $metaData - @default null
+    @param array $correlationData - @default null
+    @param array $payloadData - @default null
+    @param array $arbitraryDataMap - @default null
+```    
+    
 ## Getting Started
 
 ### Installing the Publisher
