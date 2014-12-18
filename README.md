@@ -14,6 +14,33 @@ The publisher uses [Apache Thrift] to publish data sent by the PHP client to the
 - [Apache log4php] v2.3.0
 - [Apache Thrift] v0.9
 
+## API
+
+#### class Publisher
+```PHP
+function __construct($receiverURL, $username, $password, $authenticationURL)
+
+    @param string $receiverURL
+    @param string $username
+    @param string $password
+    @param string $authenticationURL - @default null
+  
+function findStreamId($streamName, $streamVersion)
+    
+    @param string $streamName
+    @param string $streamVersion
+    @return string $streamId
+    @throws NoStreamDefinitionExistException
+    
+function defineStream($streamDefinision)
+
+    @param string $streamDefinision
+    @return string $streamId
+    @throws StreamDefinitionException
+    @throws DifferentStreamDefinitionAlreadyDefinedException
+    @throws MalformedStreamDefinitionException
+```
+
 ## Getting Started
 
 ### Installing the Publisher
