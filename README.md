@@ -14,6 +14,78 @@ The publisher uses [Apache Thrift] to publish data sent by the PHP client to the
 - [Apache log4php] v2.3.0
 - [Apache Thrift] v0.9
 
+## Getting Started
+
+### Installing the Publisher
+
+The recommended way of installing the Publisher is via [Composer].
+
+The BAM PHP publisher is added to the [Packagist] archive. Therefore the publisher can be installed to a project by including it as a dependancy in `Composer.json`. When installing via Composer, log4php and thrift dependancies will be automatically installed to the project.
+
+```json
+{
+    "require": {
+        "omindu/php-publisher": "dev-master"
+    }
+}
+```
+
+### Sample Publisher Client
+
+
+```PHP
+$receiverURL = 'tcp://10.100.5.198:7761';
+$authenticationURL = 'https://localhost:9443';
+$username = 'admin';
+$password = 'admin';
+
+try {
+    
+    //Initializing a Publisher object
+    $publisher = new Publisher($receiverURL, $username, $password, $authenticationURL);
+    
+    //JSON formatted stream definition
+	$streamDefinition = "{ 'name':'sample.stream', "
+			             ."'version':'1.0.0', "
+			             ."'nickName':'Sample Saream Definition'," 
+			             ."'description':'This is a description',"    
+			             ."'metaData':[{'name':'metaField1','type':'STRING'}],"
+			             ."'correlationData':[{'name':'corrField1','type':'STRING'}],"
+					     ."'payloadData':[{'name':'payloadField1','type':'STRING'},"
+					                       ."{'name':'payloadField2','type':'DOUBLE'},"
+					                       ."{'name':'payloadField3','type':'STRING'},"
+						                   ."{'name':'payloadField4','type':'INT'} ] }";	
+	
+	//Adding the strem definition to BAM
+	$streamId = $publisher->defineStream($streamDefinition);
+	
+	//Searching a stream definition
+	$streamId =  $publisher->findStream( 'sample.stream', '1.0.0' );
+    
+    //Initializing an Event object
+    $event = new Event($streamId, time());
+    
+    //Setting up event attributes. The of each array should follow the data type and order of the stream definiiton
+	$metaData = ['meta1'];
+	$correlationData = ['corr1'];
+	$payloadData = ['pay1',pi(),'pay2',888];
+	$arbitraryDataMap = ['x'=>'arb1','y'=>'arb2'];
+	
+	//Adding the attributes to the Event object
+	$event->setMetaData($metaData);
+	$event->setCorrelationData($correlationData);
+	$event->setPayloadData($payloadData);
+	$event->setArbitraryDataMap($arbitraryDataMap);	
+
+    //Publish the event to BAM
+	$publisher->publish($event);
+    	
+}catch(Exception $e){
+    //To see the exception types supported by the publisher, refer the API section
+    print_r($e->getTrace());
+}
+```
+
 ## API
 
 #### `class Publisher`
@@ -55,22 +127,43 @@ function __construct($streamId, $timeStamp, $metaData , $correlationData, $paylo
     @param array $correlationData - @default null
     @param array $payloadData - @default null
     @param array $arbitraryDataMap - @default null
-```    
     
-## Getting Started
+function getStreamId()
+    @return string $streamId
+    
+function setStreamId($streamId)
+    @param string $streamId
 
-### Installing the Publisher
-
-The recommended way of installing the Publisher is via [Composer].
-
-The BAM PHP publisher is added to the [Packagist] archive. Therefore the publisher can be installed to a project by including it as a dependancy in `Composer.json`. When installing via Composer, log4php and thrift dependancies will be automatically installed to the project.
-
-```json
-{
-    "require": {
-        "omindu/php-publisher": "dev-master"
-    }
-}
+function getTimeStamp()
+    @return long $timeStamp
+    
+function setTimeStamp($timeStamp)
+    @param long $timeStamp
+    
+function getMetaData()
+    @return array $metaData
+    
+function setMetaData($metaData)
+    @param array $metaData
+    
+function getCorrelationData()
+    @return array $correlationData
+    
+function setCorrelationData($correlationData)
+    @param array $correlationData
+    
+function getPayloadData()
+    @return array $payloadData
+    
+function setPayloadData($payloadData)
+    @param array $payloadData
+    
+function getArbitraryDataMap()
+    @return array $arbitraryDataMap
+    
+function setArbitraryDataMap($arbitraryDataMap)
+    @param array $arbitraryDataMap
+    
 ```
 
 [WSO2 Business Activity Monitor]:http://wso2.com/products/business-activity-monitor/
