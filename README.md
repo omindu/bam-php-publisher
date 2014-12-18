@@ -166,8 +166,13 @@ function setArbitraryDataMap($arbitraryDataMap)
     
 ```
 
+## License
+[Apache License 2.0]
+
+
 [WSO2 Business Activity Monitor]:http://wso2.com/products/business-activity-monitor/
 [Apache Thrift]:https://thrift.apache.org/
 [Apache log4php]:http://logging.apache.org/log4php/index.html
 [Composer]:https://getcomposer.org/
 [Packagist]:https://packagist.org/
+[Apache License 2.0]:http://www.apache.org/licenses/LICENSE-2.0
