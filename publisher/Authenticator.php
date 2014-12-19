@@ -16,6 +16,7 @@ class Authenticator
     private $log;
 
     private $configuration;
+
     /**
      *
      * @param array $authenticationURL            
@@ -52,19 +53,24 @@ class Authenticator
         $curl = curl_init($this->authenticationURLBuilder($this->authenticationURL));
         
         if ($this->configuration->getVerifyPeer()) {
-            $this->log->info("Peer verification enabled");
+            if ($this->log->isDebugEnabled()) {
+                $this->log->debug("Peer verification enabled");
+            }
             
             curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
             curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
             
             if ($this->configuration->getCaFile()) {
-                $this->log->info("Setting CA file to: ".$this->configuration->getCaFile());
+                
+                if ($this->log->isDebugEnabled()) {
+                    $this->log->debug("Setting CA file to: " . $this->configuration->getCaFile());
+                }
                 curl_setopt($curl, CURLOPT_CAINFO, $this->configuration->getCaFile());
             } else {
-                $this->log->warn("CA File not set. Using default value: ".PublisherConstants::CAFILE_PATH);
+                $this->log->warn("CA File not set. Using default value: " . PublisherConstants::CAFILE_PATH);
                 curl_setopt($curl, CURLOPT_CAINFO, PublisherConstants::CAFILE_PATH);
             }
-        }else{
+        } else {
             $this->log->info("Peer verification disabled");
             curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
         }
@@ -75,17 +81,18 @@ class Authenticator
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         
         $response = curl_exec($curl);
+        
         $errorStatus = curl_errno($curl);
         $statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         
-        //echo $errorStatus;
-        //var_dump(curl_error($curl));
-        //var_dump($response);
-        //var_dump(curl_getinfo($curl));
+        // echo $errorStatus;
+        // var_dump(curl_error($curl));
+        // var_dump($response);
+        // var_dump(curl_getinfo($curl));
         
         if ($errorStatus !== 0) {
             
-            $error = "Error connectiong to secure authentication service. " . curl_error($curl);
+            $error = "Error connecting to secure authentication service. " . curl_error($curl);
             $this->log->error($error);
             throw new ConnectionException($error);
         } elseif ($statusCode !== 200) {
@@ -100,10 +107,9 @@ class Authenticator
         return $sessionID;
     }
 
-    
     private function authenticationURLBuilder($authenticationURL)
     {
-        return $authenticationURL['scheme'] . '://' . $authenticationURL['host'] . ':' . $authenticationURL['port'] . PublisherConstants::PUBLISHER_AUTHENTICATION_SERVICE_URL;
+        return $authenticationURL['scheme'] . PublisherConstants::URL_SCHEME_AND_HOST_SEPERATOR . $authenticationURL['host'] . PublisherConstants::URL_HOST_AND_PORT_SEPERATOR . $authenticationURL['port'] . PublisherConstants::PUBLISHER_AUTHENTICATION_SERVICE_URL;
     }
 }
 

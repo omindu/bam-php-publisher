@@ -19,9 +19,7 @@ class ThriftEventConverter
      */
     public static function covertToThriftBundle($event, $sessionId, $thiftEventBundle = NULL)
     {
-        // $thiftEventBundle = new ThriftEventBundle (); // /<-remove
         
-        // $event = new Event (); // <-remove
         if (! $thiftEventBundle) {
             $thiftEventBundle = new ThriftEventBundle();
             $thiftEventBundle->sessionId = $sessionId;
@@ -49,7 +47,7 @@ class ThriftEventConverter
      */
     private static function assignAttribute($thiftEventBundle, $attributes)
     {
-        // $thiftEventBundle = new ThriftEventBundle (); // /<-remove
+        
         $log = \Logger::getLogger ( PublisherConstants::LOGGER_NAME );
         if ($attributes) {
             foreach ($attributes as $value) {
@@ -88,7 +86,7 @@ class ThriftEventConverter
      */
     private static function assignMap($thiftEventBundle, $arbitraryDataMap)
     {
-        // $thiftEventBundle = new ThriftEventBundle ( $thiftEventBundle, $attributes ); // /<-remove
+        
         if ($arbitraryDataMap) {
             $thiftEventBundle->arbitraryDataMapMap = array(
                 $arbitraryDataMap

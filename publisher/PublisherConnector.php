@@ -11,6 +11,10 @@ use Thrift\Protocol\TBinaryProtocolAccelerated;
 use Thrift\Exception\TTransportException;
 use Thrift\Exception\TException;
 use org\wso2\carbon\databridge\commons\thrift\service\general\ThriftEventTransmissionServiceClient;
+use Thrift\Transport\THttpClient;
+use Thrift\Protocol\TCompactProtocol;
+use org\wso2\carbon\databridge\commons\thrift\service\secure\ThriftSecureEventTransmissionServiceClient;
+use org\wso2\carbon\databridge\commons\thrift\exception\ThriftAuthenticationException;
 
 class PubllisherConnector
 {
@@ -25,6 +29,8 @@ class PubllisherConnector
 
     private $publisherProtocol;
 
+    private $secureProtocol;
+
     private $sessionId;
 
     private $secureClient;
@@ -36,10 +42,12 @@ class PubllisherConnector
     private $log;
 
     private $authenticator;
-    
+
     private $configuration;
 
     /**
+     *
+     * @internal
      *
      * @param array $receiverURL            
      * @param array $authenticationURL            
@@ -58,8 +66,12 @@ class PubllisherConnector
         $this->password = $password;
         $this->configuration = $configuration;
         
-        $this->createProtocol();
-        $this->authenticator = new Authenticator($authenticationURL, $username, $password, $configuration);
+        if ($this->receiverURL['scheme'] == 'tcp') {
+            $this->createProtocol();
+            $this->authenticator = new Authenticator($authenticationURL, $username, $password, $configuration);
+        } elseif ($this->receiverURL['scheme'] == 'https') {
+            $this->createSecureProtcol();
+        }
     }
 
     /**
@@ -69,8 +81,22 @@ class PubllisherConnector
      */
     private function connect()
     {
-        $this->sessionId = $this->authenticator->Authenticate();
-        // $this->sessionId = '94509fe0-3325-4029-875a-1718ce210252';
+        if ($this->receiverURL['scheme'] == 'tcp') {
+            $this->sessionId = $this->authenticator->Authenticate();
+        } elseif ($this->receiverURL['scheme'] == 'https') {
+            try {
+                $this->secureClient = new ThriftSecureEventTransmissionServiceClient($this->secureProtocol);
+                $this->sessionId = $this->secureClient->connect($this->username, $this->password);
+            } catch (ThriftAuthenticationException $e) {
+                $error = "Error while authenticating the publisher. ".$e->getMessage();
+                $this->log->error($error, $e);
+                throw new AuthenticationException($error, $e);
+            } catch (TTransportException $e) {
+                $error = "Error connecting to secure authentication service at ".$this->buildURLWithPort($this->authenticationURL);
+                $this->log->error($error, $e);
+                throw new ConnectionException($error, $e);
+            }
+        }
     }
 
     /**
@@ -81,7 +107,8 @@ class PubllisherConnector
     private function createProtocol()
     {
         try {
-            $socket = new TSocket($this->buildURL($this->receiverURL), $this->receiverURL['port']);
+            
+            $socket = new TSocket($this->buildURLWithoutPort($this->receiverURL), $this->receiverURL['port']);
             $transport = new TBufferedTransport($socket);
             $this->publisherProtocol = new TBinaryProtocolAccelerated($transport);
             $transport->open();
@@ -89,15 +116,24 @@ class PubllisherConnector
             if ($e->getCode() == TTransportException::ALREADY_OPEN) {
                 $this->log->warn('Socket already open - ' . $e);
             } else {
-                $error = 'Error creating the publisher protocol with '.$socket->getHost().':'.$socket->getPort();
+                $error = 'Error creating the publisher protocol with ' . $socket->getHost() . PublisherConstants::URL_HOST_AND_PORT_SEPERATOR . $socket->getPort();
                 $this->log->error($error, $e);
                 throw new ConnectionException($error, $e);
             }
         } catch (TException $e) {
-            $error = 'Error creating the publisher protocol with '.$socket->getHost().':'.$socket->getPort();
+            $error = 'Error creating the publisher protocol with ' . $socket->getHost() . PublisherConstants::URL_HOST_AND_PORT_SEPERATOR . $socket->getPort();
             $this->log->error($error, $e);
             throw new ConnectionException($error, $e);
         }
+    }
+
+    /**
+     */
+    private function createSecureProtcol()
+    {
+        $transport = new THttpClient($this->authenticationURL['host'], $this->authenticationURL['port'], PublisherConstants::THRIFT_SECURE_EVENT_TRANSMISSION_SERVLET_URI, $this->authenticationURL['scheme']);
+        
+        $this->secureProtocol = new TCompactProtocol($transport);
     }
 
     /**
@@ -129,11 +165,33 @@ class PubllisherConnector
      */
     public function getPublisherClient()
     {
-        if (! isset($this->publisherClient)) {
-            $this->publisherClient = new ThriftEventTransmissionServiceClient($this->publisherProtocol);
+        if ($this->receiverURL['scheme'] == 'tcp') {
+            if (! isset($this->publisherClient)) {
+                $this->publisherClient = new ThriftEventTransmissionServiceClient($this->publisherProtocol);
+            }
+            
+            return $this->publisherClient;
+        } elseif ($this->receiverURL['scheme'] == 'https') {
+            if (! isset($this->publisherClient)) {
+                $this->publisherClient = new ThriftSecureEventTransmissionServiceClient($this->secureProtocol);
+            }
+            
+            return $this->publisherClient;
+        }
+    }
+
+    /**
+     * Returns an active secure event transmisson service client
+     *
+     * @return ThriftSecureEventTransmissionServiceClient
+     */
+    public function getSecureClient()
+    {
+        if (! isset($this->secureClient)) {
+            $this->secureClient = new ThriftSecureEventTransmissionServiceClient($this->secureProtocol);
         }
         
-        return $this->publisherClient;
+        return $this->secureClient;
     }
 
     /**
@@ -156,8 +214,13 @@ class PubllisherConnector
      * @param string $url            
      * @return string
      */
-    private function buildURL($url)
+    private function buildURLWithoutPort($url)
     {
-        return $url['scheme'] . '://' . $url['host'];
+        return $url['scheme'] . PublisherConstants::URL_SCHEME_AND_HOST_SEPERATOR . $url['host'];
+    }
+
+    private function buildURLWithPort($url)
+    {
+        return $url['scheme'] . PublisherConstants::URL_SCHEME_AND_HOST_SEPERATOR . $url['host'] . PublisherConstants::URL_HOST_AND_PORT_SEPERATOR . $url['port'];
     }
 }

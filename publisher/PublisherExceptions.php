@@ -19,6 +19,12 @@ class PublisherException extends Exception
     public static $AUTHENTICATION_EXCEPTION = 6;
     
     public static $EVENT_PUBLISH_EXCEPTION = 7;
+    
+    public static $MALFORMED_STREAM_DEFINITION_EXCEPTION = 8;
+    
+    public static $DIFFERENT_STREAM_DEFINITION_ALREADY_DEFINED_EXCEPTION = 9;
+    
+    public static $NO_STREAM_DEFINITION_EXCEPTION = 10;
 
 
 
@@ -58,6 +64,31 @@ class StreamDefinitionException extends PublisherException
         parent::__construct($message, PublisherException::$STREAM_DEFINITION_EXCEPTION, $error);
     }
 }
+
+class DifferentStreamDefinitionAlreadyDefinedException extends PublisherException{
+
+    public function __construct($message, $error = null)
+    {
+        parent::__construct($message, PublisherException::$DIFFERENT_STREAM_DEFINITION_ALREADY_DEFINED_EXCEPTION, $error);
+    }
+}
+ 
+class MalformedStreamDefinitionException extends PublisherException{
+
+    public function __construct($message, $error = null)
+    {
+        parent::__construct($message, PublisherException::$MALFORMED_STREAM_DEFINITION_EXCEPTION, $error);
+    }
+}
+
+class NoStreamDefinitionExistException extends PublisherException{
+
+    public function __construct($message, $error = null)
+    {
+        parent::__construct($message, PublisherException::$NO_STREAM_DEFINITION_EXCEPTION, $error);
+    }
+}
+
 
 class ConnectionException extends PublisherException
 {

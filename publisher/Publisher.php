@@ -53,12 +53,16 @@ class Publisher
      * @var log4j Logger
      */
     private $log;
-    
+
     /**
-     * 
+     *
      * @var PublisherConfiguration
      */
     private $configuration;
+
+    private static $RECEIVER_URL = 1;
+
+    private static $AUTHENTICATION_URL = 2;
 
     /**
      *
@@ -72,24 +76,25 @@ class Publisher
      *            ex: https://192.168.1.1:9443
      *            
      * @throws NullPointerException
+     * @throws ConnectionException
      */
     public function __construct($receiverURL, $username, $password, $authenticationURL = NULL, PublisherConfiguration $configuration = null)
     {
         $this->configureLogger();
         
-        if (!$configuration) {
+        if (! $configuration) {
             $configuration = new PublisherConfiguration();
         }
         
         if ($receiverURL) {
-            $this->setReceiverURL($receiverURL);
+            $this->receiverURL = $this->validateURLs($receiverURL, Publisher::$RECEIVER_URL);
         } else {
             $error = 'Receiver URL cannot be NULL';
             $this->log->error($error);
             throw new NullPointerException($error);
         }
         
-        $this->setAuthenticationURL($authenticationURL);
+        $this->authenticationURL = $this->validateURLs($authenticationURL, Publisher::$AUTHENTICATION_URL);
         $this->username = $username;
         $this->password = $password;
         $this->connector = new PubllisherConnector($this->receiverURL, $this->authenticationURL, $username, $password, $configuration);
@@ -101,98 +106,119 @@ class Publisher
         $this->log = \Logger::getLogger(PublisherConstants::LOGGER_NAME);
     }
 
-    /**
-     * Processes the publish URL
-     *
-     * @param array $receiverURL            
-     * @throws NullPointerException
-     */
-    private function setReceiverURL($receiverURL)
+    private function validateURLs($referenceURL, $urlType)
     {
-        if (strpos($receiverURL, 'localhost') !== FALSE) {
-            str_replace('localhost', '127.0.0.1', $receiverURL);
-            $this->log->info('Changing receiver url from \'localhost\' to 127.0.0.1');
+        if (! ($urlType == Publisher::$RECEIVER_URL || $urlType == Publisher::$AUTHENTICATION_URL)) {
+            $error = 'Invalid URL type ' . $urlType;
+            $this->log->error($error);
+            //TODO throw new;
         }
         
-        $url = parse_url($receiverURL);
+        if (! $referenceURL && $urlType == Publisher::$RECEIVER_URL) {
+            $error = 'Receiver URL cannot be NULL';
+            $this->log->error($error);
+            throw new NullPointerException($error);
+        } elseif (! $referenceURL && $urlType == Publisher::$AUTHENTICATION_URL) { // if authentication url is not defined construct from receiver url
+            
+            if ($this->receiverURL['scheme']== 'https' ) {
+                $url = $this->receiverURL;
+            }else{
+                $url = array(
+                    'scheme' => 'https',
+                    'host' => $this->receiverURL['host'],
+                    'port' => PublisherConstants::DEFAULT_BAM_SECURE_PORT
+                );
+            }
+            $this->log->info('BAM secure server url not defined, Using :' . $url['scheme'] . PublisherConstants::URL_SCHEME_AND_HOST_SEPERATOR . $url['host'] . PublisherConstants::URL_HOST_AND_PORT_SEPERATOR . $url['port']);
+            return $url;
+        }
         
+        $url = parse_url($referenceURL);
+        
+        /**
+         * parse_url() seperates a url string into parts such as scheme, host, port, path and stores in an assosiative array
+         * $array('scheme' => 'tcp',
+         *         'host' => '192.168.1.1',
+         *         'port' => '7611'
+         *         'path' => '/path')
+         * 
+         * if the url only has an ip, the parse_url() method identifies the IP as a path.
+         * 
+         */
         if (isset($url['path']) && ! isset($url['host'])) {
             
-            if (filter_var($url['path'], FILTER_VALIDATE_IP)) {
+            /**
+             * Checking if the path is an IP
+             */
+            if (filter_var($url['path'], FILTER_VALIDATE_IP) | $url['path'] == 'localhost') {
                 $url['host'] = $url['path'];
+                unset($url['path']);
+            } else {
+                $error = 'Invalid URL '.$url;
+                $this->log->error($error);
+                throw new MalformedURLException($error);
             }
         }
         
         if (array_key_exists('host', $url)) {
             if (! array_key_exists('scheme', $url)) {
-                // using tcp by default
-                $url['scheme'] = 'tcp';
-                $this->log->info('Receiver url scheme not defined, Using TCP.');
-            }
-            if (! array_key_exists('port', $url)) {
-                // using default thrift receiver port
-                $url['port'] = PublisherConstants::DEFAULT_THRIFT_RECEIVER_PORT;
-                $this->log->info('Receiver url port not defined, Using port: ' . $url['port']);
-            }
-            
-            $this->receiverURL = $url;
-        } else {
-            $error = "Invalid Receiver URL '" . $receiverURL . "'. Receiver URL should be in the form of tcp://[host]:[port]";
-            $this->log->error($error);
-            throw new NullPointerException($error);
-        }
-    }
-
-    /**
-     * Processes the authentication URL
-     *
-     * @param array $authenticationURL            
-     * @throws MalformedURLException
-     */
-    private function setAuthenticationURL($authenticationURL)
-    {
-        if ($authenticationURL) {
-            
-            $url = parse_url($authenticationURL);
-            
-            if (isset($url['path']) && ! isset($url['host'])) {
                 
-                if (filter_var($url['path'], FILTER_VALIDATE_IP) | $url['path'] == 'localhost') {
-                    $url['host'] = $url['path'];
-                    unset($url['path']);
-                }
-            }
-            
-            if (array_key_exists('host', $url)) {
-                if (! array_key_exists('port', $url)) {
-                    // using default thrift receiver port
-                    $url['port'] = PublisherConstants::DEFAULT_BAM_SECURE_PORT;
-                    $this->log->info('BAM secure server port not defined, Using port: ' . $url['port']);
-                }
-                if (! array_key_exists('scheme', $url)) {
+                if ($urlType == Publisher::$RECEIVER_URL) {
+                    $url['scheme'] = 'tcp';
+                    $this->log->warn('Receiver url scheme not defined, Using TCP.');
+                } elseif ($urlType == Publisher::$AUTHENTICATION_URL) {
                     // using https by default
                     $url['scheme'] = 'https';
                     $this->log->info('BAM secure server url scheme not defined, Using https.');
-                } elseif ($url['scheme'] != 'https') {
-                    
-                    $this->log->info('BAM secure server url scheme is not https. Provided \'' . $url['scheme'] . '\' instead. Switching to https');
                 }
-                
-                $this->authenticationURL = $url;
             } else {
-                $error = "Invalid BAM secure server URL: " . $authenticationURL . ". The URL should be in the form of https://[host]:[port]";
-                $this->log->error($error);
-                throw new MalformedURLException($error);
+                if ($urlType == Publisher::$RECEIVER_URL && ($url['scheme'] != 'tcp' && $url['scheme'] != 'https')) {
+                    $this->log->error('Unsupported URL scheme ' . $url['scheme'] . ' Switching to');
+                }
+                if ($urlType == Publisher::$AUTHENTICATION_URL && $url['scheme'] != 'https') {
+                    //TODO
+                    $this->log->warn();
+                }
             }
-        } else { // if authentication url is not defined construct from receiver url
-            $this->authenticationURL = array(
-                'scheme' => 'https',
-                'host' => $this->receiverURL['host'],
-                'port' => PublisherConstants::DEFAULT_BAM_SECURE_PORT
-            );
-            $this->log->info('BAM secure server url not defined, Using :' . $this->authenticationURL['scheme'] . "://" . $this->authenticationURL['host'] . ':' . $this->authenticationURL['port']);
+            if (! array_key_exists('port', $url)) {
+                if ($urlType == Publisher::$RECEIVER_URL) {
+                    // using default thrift receiver port
+                    if ($url['scheme'] == 'tcp') {
+                        $url['port'] = PublisherConstants::DEFAULT_THRIFT_RECEIVER_PORT;;
+                    }elseif ($url['scheme'] == 'https') {
+                            $url['port'] = PublisherConstants::DEFAULT_BAM_SECURE_PORT;
+                        
+                    }
+                    
+                    $this->log->warn('Receiver url port not defined, Using port: ' . $url['port']);
+                } elseif ($urlType == Publisher::$AUTHENTICATION_URL) {
+                    // using default BAM https port
+                    $url['port'] = PublisherConstants::DEFAULT_BAM_SECURE_PORT;
+                    $this->log->warn('BAM secure server port not defined, Using port: ' . $url['port']);
+                }
+            }
+            
+            if (! array_key_exists('port', $url)) {
+                // using default thrift receiver port
+                $url['port'] = PublisherConstants::DEFAULT_THRIFT_RECEIVER_PORT;
+                $this->log->warn('Receiver url port not defined, Using port: ' . $url['port']);
+            }
+            
+            return  $url;
+        } else {
+            
+            $error = '';
+            if ($urlType == Publisher::$RECEIVER_URL) {
+                $error = "Invalid Receiver URL '" . $referenceURL . "'. Receiver URL should be in the form of tcp://[host]:[port]";
+            } else 
+                if ($urlType == Publisher::$AUTHENTICATION_URL) {
+                    $error = "Invalid BAM secure server URL: " . $referenceURL . ". The URL should be in the form of https://[host]:[port]";
+                }
+            $this->log->error($error);
+            throw new MalformedURLException($error);
         }
     }
+
 
     /**
      * Search a stream definition, given the stream name and the version
@@ -201,16 +227,16 @@ class Publisher
      * @param string $streaVersion            
      * @return string StreamID if exist else FALSE
      *        
-     * @throws StreamDefinitionException
+     * @throws NoStreamDefinitionExistException
      */
-    public function findStream($streamName, $streamVersion)
+    public function findStreamId($streamName, $streamVersion)
     {
         try {
             return $this->connector->getPublisherClient()->findStreamId($this->connector->getSessionId(), $streamName, $streamVersion);
         } catch (ThriftNoStreamDefinitionExistException $e) {
             $error = 'Stream definition: ' . $streamName . ':' . $streamVersion . ' not found';
             $this->log->error($error, $e);
-            throw new StreamDefinitionException('Stream definition: ' . $streamName . ':' . $streamVersion . ' not found', $e);
+            throw new NoStreamDefinitionExistException('Stream definition: ' . $streamName . ':' . $streamVersion . ' not found', $e);
         } catch (ThriftSessionExpiredException $e) {
             $this->log->error('Session expired.', $e);
             $this->connector->reconnect();
@@ -225,19 +251,21 @@ class Publisher
      * @return string stream ID upon successfull insertion
      *        
      * @throws StreamDefinitionException
+     * @throws DifferentStreamDefinitionAlreadyDefinedException
+     * @throws MalformedStreamDefinitionException
      */
-    public function addStreamDefinition($streamDefinision)
+    public function defineStream($streamDefinision)
     {
         try {
             return $this->connector->getPublisherClient()->defineStream($this->connector->getSessionId(), $streamDefinision);
         } catch (ThriftDifferentStreamDefinitionAlreadyDefinedException $e) {
-            $error = 'Stream definition already exist!';
+            $error = 'A different stream definition already exist!';
             $this->log->error($error, $e);
-            throw new StreamDefinitionException($error, $e);
+            throw new DifferentStreamDefinitionAlreadyDefinedException($error, $e);
         } catch (ThriftMalformedStreamDefinitionException $e) {
             $error = 'Malformed stream definition!';
             $this->log->error($error, $e);
-            throw new StreamDefinitionException($error, $e);
+            throw new MalformedStreamDefinitionException($error, $e);
         } catch (ThriftStreamDefinitionException $e) {
             $error = 'Error adding the stream definition!';
             $this->log->error($error, $e);
@@ -257,7 +285,6 @@ class Publisher
      */
     public function publish($event)
     {
-        // $connector = new ThriftSecureEventTransmissionServiceClient($input); //<-remove!!
         $eventBundle = ThriftEventConverter::covertToThriftBundle($event, $this->connector->getSessionId());
         try {
             $this->connector->getPublisherClient()->publish($eventBundle);
@@ -272,4 +299,6 @@ class Publisher
             $this->publish($event);
         }
     }
+    
+    
 }
