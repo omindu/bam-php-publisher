@@ -1,6 +1,24 @@
 <?php
+/*
+ * Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 namespace publisher;
 
+\Logger::configure(PublisherConstants::LOG4J_CONFIG_FILE_PATH);
 use org\wso2\carbon\databridge\commons\thrift\exception\ThriftNoStreamDefinitionExistException;
 use org\wso2\carbon\databridge\commons\thrift\service\secure\ThriftSecureEventTransmissionServiceClient;
 use org\wso2\carbon\databridge\commons\thrift\exception\ThriftSessionExpiredException;
@@ -78,7 +96,8 @@ class Publisher
      * @throws NullPointerException
      * @throws ConnectionException
      */
-    public function __construct($receiverURL, $username, $password, $authenticationURL = NULL, PublisherConfiguration $configuration = null)
+    public function __construct($receiverURL, $username, $password, $authenticationURL = NULL, 
+                                PublisherConfiguration $configuration = null)
     {
         $this->configureLogger();
         
@@ -97,12 +116,13 @@ class Publisher
         $this->authenticationURL = $this->validateURLs($authenticationURL, Publisher::$AUTHENTICATION_URL);
         $this->username = $username;
         $this->password = $password;
-        $this->connector = new PubllisherConnector($this->receiverURL, $this->authenticationURL, $username, $password, $configuration);
+        $this->connector = new PubllisherConnector($this->receiverURL, $this->authenticationURL, 
+                                            $username, $password, $configuration);
     }
 
     private function configureLogger()
     {
-        \Logger::configure(PublisherConstants::LOG4J_CONFIG_FILE_PATH);
+        
         $this->log = \Logger::getLogger(PublisherConstants::LOGGER_NAME);
     }
 
@@ -113,7 +133,8 @@ class Publisher
             $error = 'Receiver URL cannot be NULL';
             $this->log->error($error);
             throw new NullPointerException($error);
-        } elseif (! $referenceURL && $urlType == Publisher::$AUTHENTICATION_URL) { // if authentication url is not defined construct from receiver url
+        } elseif (! $referenceURL && $urlType == Publisher::$AUTHENTICATION_URL) { 
+            // if authentication url is not defined construct from receiver url
             
             if ($this->receiverURL['scheme']== 'https' ) {
                 $url = $this->receiverURL;
@@ -124,7 +145,9 @@ class Publisher
                     'port' => PublisherConstants::DEFAULT_BAM_SECURE_PORT
                 );
             }
-            $this->log->info('BAM secure server url not defined, Using :' . $url['scheme'] . PublisherConstants::URL_SCHEME_AND_HOST_SEPERATOR . $url['host'] . PublisherConstants::URL_HOST_AND_PORT_SEPERATOR . $url['port']);
+            $this->log->info('BAM secure server url not defined, Using :' . $url['scheme'] 
+                            . PublisherConstants::URL_SCHEME_AND_HOST_SEPERATOR . $url['host'] 
+                            . PublisherConstants::URL_HOST_AND_PORT_SEPERATOR . $url['port']);
             return $url;
         }
         
@@ -207,7 +230,8 @@ class Publisher
                 $error = "Invalid Receiver URL '" . $referenceURL . "'. Receiver URL should be in the form of tcp://[host]:[port]";
             } else 
                 if ($urlType == Publisher::$AUTHENTICATION_URL) {
-                    $error = "Invalid BAM secure server URL: " . $referenceURL . ". The URL should be in the form of https://[host]:[port]";
+                    $error = "Invalid BAM secure server URL: " . $referenceURL 
+                            . ". The URL should be in the form of https://[host]:[port]";
                 }
             $this->log->error($error);
             throw new MalformedURLException($error);
@@ -227,11 +251,13 @@ class Publisher
     public function findStreamId($streamName, $streamVersion)
     {
         try {
-            return $this->connector->getPublisherClient()->findStreamId($this->connector->getSessionId(), $streamName, $streamVersion);
+            return $this->connector->getPublisherClient()->findStreamId($this->connector->getSessionId(), 
+                                                                        $streamName, $streamVersion);
         } catch (ThriftNoStreamDefinitionExistException $e) {
             $error = 'Stream definition: ' . $streamName . ':' . $streamVersion . ' not found';
             $this->log->error($error, $e);
-            throw new NoStreamDefinitionExistException('Stream definition: ' . $streamName . ':' . $streamVersion . ' not found', $e);
+            throw new NoStreamDefinitionExistException('Stream definition: ' . $streamName . ':' 
+                                                        . $streamVersion . ' not found', $e);
         } catch (ThriftSessionExpiredException $e) {
             $this->log->error('Session expired.', $e);
             $this->connector->reconnect();
@@ -252,7 +278,8 @@ class Publisher
     public function defineStream($streamDefinision)
     {
         try {
-            return $this->connector->getPublisherClient()->defineStream($this->connector->getSessionId(), $streamDefinision);
+            return $this->connector->getPublisherClient()->defineStream($this->connector->getSessionId(),
+                                                                        $streamDefinision);
         } catch (ThriftDifferentStreamDefinitionAlreadyDefinedException $e) {
             $error = 'A different stream definition already exist!';
             $this->log->error($error, $e);

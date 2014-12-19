@@ -1,9 +1,23 @@
 <?php
+/*
+ * Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 namespace publisher;
 
-// include '../logger/php/Logger.php';
-
-// Logger::configure('../logger/config.xml');
 use Thrift\ClassLoader\ThriftClassLoader;
 use Thrift\Transport\TSocket;
 use Thrift\Transport\TBufferedTransport;
@@ -116,12 +130,16 @@ class PubllisherConnector
             if ($e->getCode() == TTransportException::ALREADY_OPEN) {
                 $this->log->warn('Socket already open - ' . $e);
             } else {
-                $error = 'Error creating the publisher protocol with ' . $socket->getHost() . PublisherConstants::URL_HOST_AND_PORT_SEPERATOR . $socket->getPort();
+                $error = 'Error creating the publisher protocol with ' 
+                                    . $socket->getHost() 
+                                    . PublisherConstants::URL_HOST_AND_PORT_SEPERATOR 
+                                    . $socket->getPort();
                 $this->log->error($error, $e);
                 throw new ConnectionException($error, $e);
             }
         } catch (TException $e) {
-            $error = 'Error creating the publisher protocol with ' . $socket->getHost() . PublisherConstants::URL_HOST_AND_PORT_SEPERATOR . $socket->getPort();
+            $error = 'Error creating the publisher protocol with ' . $socket->getHost() 
+                       . PublisherConstants::URL_HOST_AND_PORT_SEPERATOR . $socket->getPort();
             $this->log->error($error, $e);
             throw new ConnectionException($error, $e);
         }
@@ -131,7 +149,10 @@ class PubllisherConnector
      */
     private function createSecureProtcol()
     {
-        $transport = new THttpClient($this->authenticationURL['host'], $this->authenticationURL['port'], PublisherConstants::THRIFT_SECURE_EVENT_TRANSMISSION_SERVLET_URI, $this->authenticationURL['scheme']);
+        $transport = new THttpClient($this->authenticationURL['host'], 
+                                    $this->authenticationURL['port'], 
+                                    PublisherConstants::THRIFT_SECURE_EVENT_TRANSMISSION_SERVLET_URI, 
+                                    $this->authenticationURL['scheme']);
         
         $this->secureProtocol = new TCompactProtocol($transport);
     }
@@ -149,7 +170,8 @@ class PubllisherConnector
         if (! isset($this->sessionId)) {
             $this->connect();
             $this->sessionStartTime = time();
-        } elseif (time() - $this->sessionStartTime > PublisherConstants::DEFAULT_SESSION_TIMEOUT_SEC) { // if the session is expired
+        } elseif (time() - $this->sessionStartTime > PublisherConstants::DEFAULT_SESSION_TIMEOUT_SEC) { 
+            // if the session is expired
             $this->log->info('Default session time expired. Reconnecting...');
             $this->connect();
             $this->log->info('Conection established');
@@ -221,6 +243,7 @@ class PubllisherConnector
 
     private function buildURLWithPort($url)
     {
-        return $url['scheme'] . PublisherConstants::URL_SCHEME_AND_HOST_SEPERATOR . $url['host'] . PublisherConstants::URL_HOST_AND_PORT_SEPERATOR . $url['port'];
+        return $url['scheme'] . PublisherConstants::URL_SCHEME_AND_HOST_SEPERATOR . $url['host']
+                 . PublisherConstants::URL_HOST_AND_PORT_SEPERATOR . $url['port'];
     }
 }
