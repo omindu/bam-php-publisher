@@ -4,6 +4,12 @@ The PHP data publisher allows PHP clients to publish data to [WSO2 Business Acti
 
 The publisher uses [Apache Thrift] to publish data sent by the PHP client to the BAM server. The publisher exposes the client to operations such as defining data streams, searching stream definitions and publishing events.
 
+Read more on data streams and publishing data to WSO2 BAM
+
+* [Data Publisher]
+* [Stream Definitions]
+* [Creating Custom Data Publishers to BAM/CEP]
+
 ## Prerequisites
 
 - PHP 5.5.x or above 
@@ -117,6 +123,27 @@ function publish($event)
     @throws UnknownEventAttributeException    
 ```
 
+#### `class PublisherConfiguration`
+```PHP
+function __construct($verifyPeer, $caFile)
+
+    @param boolean $verifyPeer - @default false
+    @param string $caFile - @default null
+    @throws NullPointerException
+    
+function setVerifyPeer($verifyPeer)   
+    @param boolean $verifyPeer
+
+function getVerifyPeer()
+    @return boolean $verifyPeer
+
+function setCaFile($caFile)
+    @param string $caFile
+    
+function getCaFile()    
+    @return string $caFile
+```
+
 #### `class Event`
 ```PHP
 function __construct($streamId, $timeStamp, $metaData , $correlationData, $payloadData , $arbitraryDataMap)
@@ -175,4 +202,7 @@ function setArbitraryDataMap($arbitraryDataMap)
 [Apache log4php]:http://logging.apache.org/log4php/index.html
 [Composer]:https://getcomposer.org/
 [Packagist]:https://packagist.org/
+[Data Publisher]:https://docs.wso2.com/display/BAM241/Data+Publisher 
+[Stream Definitions]:http://maninda.blogspot.com/2012/10/stream-definitions.html
+[Creating Custom Data Publishers to BAM/CEP]:http://wso2.com/library/articles/2012/07/creating-custom-agents-publish-events-bamcep/
 [Apache License 2.0]:http://www.apache.org/licenses/LICENSE-2.0
