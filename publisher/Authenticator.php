@@ -102,11 +102,6 @@ class Authenticator
         $errorStatus = curl_errno($curl);
         $statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         
-        // echo $errorStatus;
-        // var_dump(curl_error($curl));
-        // var_dump($response);
-        // var_dump(curl_getinfo($curl));
-        
         if ($errorStatus !== 0) {
             
             $error = "Error connecting to secure authentication service. " . curl_error($curl);
@@ -124,6 +119,12 @@ class Authenticator
         return $sessionID;
     }
 
+    /**
+     * Build url from array
+     * 
+     * @param array $authenticationURL
+     * @return string
+     */
     private function authenticationURLBuilder($authenticationURL)
     {
         return $authenticationURL['scheme'] . PublisherConstants::URL_SCHEME_AND_HOST_SEPERATOR . $authenticationURL['host'] . PublisherConstants::URL_HOST_AND_PORT_SEPERATOR . $authenticationURL['port'] . PublisherConstants::PUBLISHER_AUTHENTICATION_SERVICE_URL;

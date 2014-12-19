@@ -128,7 +128,7 @@ class Publisher
 
     private function validateURLs($referenceURL, $urlType)
     {
-        
+           
         if (! $referenceURL && $urlType == Publisher::$RECEIVER_URL) {
             $error = 'Receiver URL cannot be NULL';
             $this->log->error($error);
@@ -194,8 +194,8 @@ class Publisher
                     $this->log->error('Unsupported URL scheme ' . $url['scheme'] . ' Switching to');
                 }
                 if ($urlType == Publisher::$AUTHENTICATION_URL && $url['scheme'] != 'https') {
-                    //TODO
-                    $this->log->warn();
+                    
+                    $this->log->warn('Authentication URL scheme is '.$url['scheme'].'. Switching to https');
                 }
             }
             if (! array_key_exists('port', $url)) {
