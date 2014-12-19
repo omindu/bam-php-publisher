@@ -5,7 +5,7 @@
     "description": "PHP data publisher for BAM",
     "keywords": ["WSO2","BAM", "data publisher"],
     "homepage": "https://github.com/omindu/bam-php-publisher",
-    "license": "Apache",
+    "license": "Apache License 2.0",
 	 "authors": [
 	 {
 		 "name": "omindu",
