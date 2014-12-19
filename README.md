@@ -45,10 +45,17 @@ $authenticationURL = 'https://localhost:9443';
 $username = 'admin';
 $password = 'admin';
 
+$verifyPeer = true;
+$caFile = '/absolute/path/to/certificate.pem';
+
+
 try {
     
+    //Set configuration properties for the publisher
+    $config = new PublisherConfiguration($verifyPeer, $caFile);
+    
     //Initializing a Publisher object
-    $publisher = new Publisher($receiverURL, $username, $password, $authenticationURL);
+    $publisher = new Publisher($receiverURL, $username, $password, $authenticationURL, $config);
     
     //JSON formatted stream definition
 	$streamDefinition = "{ 'name':'sample.stream', "
