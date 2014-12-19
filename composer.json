@@ -1,6 +1,6 @@
 {
 
-	"name": "omindu/php-publisher",
+	"name": "bam/php-publisher",
     "type": "library",
     "description": "PHP data publisher for BAM",
     "keywords": ["WSO2","BAM", "data publisher"],
