@@ -16,6 +16,7 @@ class PublisherConfiguration{
             if ($caFile) {
                 $this->caFile = $caFile;
             }else{
+                \Logger::configure(PublisherConstants::LOG4J_CONFIG_FILE_PATH);
                 $log = \Logger::getLogger(PublisherConstants::LOGGER_NAME);
                 $error = '$caFile cannot be null when $verifyPeer is \'true\'. Please set the $caFile ';
                 $log->error($error);
