@@ -108,11 +108,6 @@ class Publisher
 
     private function validateURLs($referenceURL, $urlType)
     {
-        if (! ($urlType == Publisher::$RECEIVER_URL || $urlType == Publisher::$AUTHENTICATION_URL)) {
-            $error = 'Invalid URL type ' . $urlType;
-            $this->log->error($error);
-            //TODO throw new;
-        }
         
         if (! $referenceURL && $urlType == Publisher::$RECEIVER_URL) {
             $error = 'Receiver URL cannot be NULL';
