@@ -26,7 +26,7 @@ Read more on data streams and publishing data to WSO2 BAM
 
 The recommended way of installing the Publisher is via [Composer].
 
-The BAM PHP publisher is added to the [Packagist] archive. Therefore the publisher can be installed to a project by including it as a dependancy in `Composer.json`. When installing via Composer, log4php and thrift dependancies will be automatically installed to the project.
+The BAM PHP publisher is added to the [Packagist] archive. Therefore the publisher can be installed to a project by including it as a dependency in `Composer.json`. When installing via Composer, log4php and thrift dependencies will be automatically installed to the project.
 
 ```json
 {
