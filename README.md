@@ -31,7 +31,7 @@ The BAM PHP publisher is added to the [Packagist] archive. Therefore the publish
 ```json
 {
     "require": {
-        "omindu/php-publisher": "dev-master"
+        "omindu/php-publisher": "1.0.0"
     }
 }
 ```
